@@ -26,3 +26,33 @@ Swagger 文档地址: http://localhost:3000/api-docs
 | PATCH | /tasks/:id | 更新任务 |
 | DELETE | /tasks/:id | 删除任务 |
 | PATCH | /tasks/:id/reorder | 拖拽排序 |
+
+
+## 启动说明
+
+### 快速启动
+
+#### Docker 一键启动（推荐）
+
+```bash
+docker-compose up --build && docker-compose start
+```
+
+访问 http://localhost 即可使用。
+
+#### 本地开发
+
+**前提**: 需要本地安装 MySQL 并创建 `todo` 数据库。
+
+```bash
+# 安装依赖
+pnpm install
+
+# 启动后端 (端口 3000)
+pnpm dev:backend
+
+# 启动前端 (端口 5173)
+pnpm dev:frontend
+```
+
+前端开发模式下通过 Vite proxy 转发 API 请求到后端。

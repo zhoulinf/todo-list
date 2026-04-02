@@ -45,10 +45,7 @@ export class TasksController {
 
   @ApiOperation({ summary: '任务拖拽排序' })
   @Patch(':id/reorder')
-  reorder(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ReorderTaskDto,
-  ) {
+  reorder(@Param('id', ParseIntPipe) id: number, @Body() dto: ReorderTaskDto) {
     return this.tasksService.reorder(id, dto);
   }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "todo-list",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter app dev",
+    "dev:backend": "pnpm --filter server start:dev",
+    "dev": "pnpm run dev:frontend & pnpm run dev:backend",
+    "build:frontend": "pnpm --filter frontend build",
+    "build:backend": "pnpm --filter backend build"
+  }
+}
