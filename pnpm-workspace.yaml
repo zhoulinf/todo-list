@@ -1,0 +1,6 @@
+packages:
+  - apps/*
+  - server
+onlyBuiltDependencies:
+  - esbuild
+  - "@nestjs/core"
