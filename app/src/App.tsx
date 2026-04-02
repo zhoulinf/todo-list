@@ -1,3 +1,5 @@
+import { KanbanBoard } from "./components/KanbanBoard";
+
 function App() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -8,7 +10,7 @@ function App() {
         </p>
       </header>
       <main className="max-w-5xl mx-auto">
-       123
+        <KanbanBoard />
       </main>
     </div>
   );
