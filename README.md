@@ -13,3 +13,16 @@
 | 后端 | NestJS + TypeORM |
 | 数据库 | MySQL 8 |
 | 容器化 | Docker + docker-compose |
+
+
+## API 接口
+
+Swagger 文档地址: http://localhost:3000/api-docs
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /tasks | 获取所有任务 |
+| POST | /tasks | 创建任务 |
+| PATCH | /tasks/:id | 更新任务 |
+| DELETE | /tasks/:id | 删除任务 |
+| PATCH | /tasks/:id/reorder | 拖拽排序 |
