@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import type { Task, TaskStatus, CreateTaskDto } from "../types/task";
 import {
   Dialog,
@@ -9,6 +10,11 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+
+interface TaskFormValues {
+  title: string;
+  description: string;
+}
 
 interface TaskDialogProps {
   open: boolean;
@@ -25,26 +31,26 @@ export function TaskDialog({
   defaultStatus = "todo",
   onSubmit,
 }: TaskDialogProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const { register, handleSubmit, reset, formState: { isValid } } = useForm<TaskFormValues>({
+    defaultValues: {
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+    },
+    mode: "onChange",
+  });
 
   useEffect(() => {
-    if (task) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTitle(task.title);
-      setDescription(task.description);
-    } else {
-      setTitle("");
-      setDescription("");
-    }
-  }, [task, open]);
+    reset({
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+    });
+  }, [task, open, reset]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
+  const onFormSubmit = (data: TaskFormValues) => {
+    if (!data.title.trim()) return;
     onSubmit({
-      title: title.trim(),
-      description: description.trim(),
+      title: data.title.trim(),
+      description: data.description.trim(),
       status: task?.status ?? defaultStatus,
     });
     onOpenChange(false);
@@ -56,12 +62,11 @@ export function TaskDialog({
         <DialogHeader>
           <DialogTitle>{task ? "编辑任务" : "新建任务"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-4">
           <div>
             <label className="text-sm font-medium text-gray-700">标题</label>
             <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              {...register("title", { required: true, validate: v => v.trim().length > 0 })}
               placeholder="输入任务标题"
               className="mt-1"
               autoFocus
@@ -70,8 +75,7 @@ export function TaskDialog({
           <div>
             <label className="text-sm font-medium text-gray-700">描述</label>
             <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description")}
               placeholder="输入任务描述（可选）"
               className="mt-1"
               rows={3}
@@ -85,7 +89,7 @@ export function TaskDialog({
             >
               取消
             </Button>
-            <Button type="submit" disabled={!title.trim()}>
+            <Button type="submit" disabled={!isValid}>
               {task ? "保存" : "创建"}
             </Button>
           </div>
