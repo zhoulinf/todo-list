@@ -6,6 +6,7 @@ import type {
   DragOverEvent,
   DragStartEvent,
 } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { getMiddle, getLast, getFirst } from "../lib/utils";
 import { COLUMNS } from "../constant";
 import { useTaskStore } from "../store/taskStore";
@@ -20,7 +21,6 @@ export const useTaskDrag = () => {
     setActiveTask(task);
   }, []);
 
-  /** 跨列拖动时临时更新 store，让目标列的 SortableContext 包含该卡片以显示占位 */
   const handleDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
@@ -50,16 +50,24 @@ export const useTaskDrag = () => {
       const last = targetList[targetList.length - 1];
       tempPosition = getLast(last?.position);
     } else {
-      // 放在 over 之前
+      // 将 active 插入到 over 的位置，模拟拖拽后的新顺序
       const overData = over.data.current as Task;
       const overIndex = targetList.findIndex((t) => t.id === overData.id);
-      const prev = targetList[overIndex - 1];
+      const newOrder = [...targetList];
+      newOrder.splice(overIndex, 0, activeData);
+      // 找前后算 position
+      const prev = overIndex > 0 ? newOrder[overIndex - 1] : null;
+      const next =
+        overIndex < newOrder.length - 1 ? newOrder[overIndex + 1] : null;
       if (!prev) {
-        tempPosition = getFirst(overData.position);
+        tempPosition = getFirst(next!.position);
+      } else if (!next) {
+        tempPosition = getLast(prev.position);
       } else {
-        tempPosition = getMiddle(prev.position, overData.position);
+        tempPosition = getMiddle(prev.position, next.position);
       }
     }
+    // 本地状态更新
     state().move(activeId, tempPosition, targetStatus);
   }, []);
 
@@ -95,36 +103,32 @@ export const useTaskDrag = () => {
       }
 
       const overData = over.data.current as Task;
-      // 排除 active 自身，计算目标列中的相对位置
-      const list = state().tasks.filter(
-        (t) => t.status === overData.status && t.id !== (active.id as number),
+      // 取出当前列完整列表（含 active），模拟拖拽后的新顺序
+      const fullList = state().tasks.filter(
+        (t) => t.status === overData.status,
       );
-      const overIndex = list.findIndex((t) => t.id === overData.id);
+      const activeIndex = fullList.findIndex(
+        (t) => t.id === (active.id as number),
+      );
+      const overIndex = fullList.findIndex((t) => t.id === overData.id);
 
-      const activeRect = active.rect.current.translated;
-      const overRect = over.rect;
-      const isDraggingDown = activeRect
-        ? activeRect.top + activeRect.height / 2 >
-          overRect.top + overRect.height / 2
-        : false;
+      const newOrder = arrayMove(fullList, activeIndex, overIndex);
+      const newActiveIndex = newOrder.findIndex(
+        (t) => t.id === (active.id as number),
+      );
+      const prev = newActiveIndex > 0 ? newOrder[newActiveIndex - 1] : null;
+      const next =
+        newActiveIndex < newOrder.length - 1
+          ? newOrder[newActiveIndex + 1]
+          : null;
 
       let newPosition: string;
-      if (isDraggingDown) {
-        // 放在 over 之后（over 与 next 之间）
-        const next = list[overIndex + 1];
-        if (!next) {
-          newPosition = getLast(overData.position);
-        } else {
-          newPosition = getMiddle(overData.position, next.position);
-        }
+      if (!prev) {
+        newPosition = getFirst(next!.position);
+      } else if (!next) {
+        newPosition = getLast(prev.position);
       } else {
-        // 放在 over 之前（prev 与 over 之间）
-        const prev = list[overIndex - 1];
-        if (!prev) {
-          newPosition = getFirst(overData.position);
-        } else {
-          newPosition = getMiddle(prev.position, overData.position);
-        }
+        newPosition = getMiddle(prev.position, next.position);
       }
 
       moveTask(active.id as number, newPosition, overData.status);
