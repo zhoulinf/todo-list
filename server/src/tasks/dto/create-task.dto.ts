@@ -23,4 +23,9 @@ export class CreateTaskDto {
   @IsIn(['todo', 'in_progress', 'done'])
   @IsOptional()
   status?: string;
+
+  @ApiPropertyOptional({ description: '任务位置', example: 'a' })
+  @IsString()
+  @IsOptional()
+  position?: string;
 }

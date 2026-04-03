@@ -20,8 +20,8 @@ export class Task {
   @Column({ default: 'todo' })
   status: string;
 
-  @Column({ default: 0 })
-  position: number;
+  @Column({ default: '', type: 'varchar' })
+  position: string;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsIn } from 'class-validator';
+import { IsString, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ReorderTaskDto {
@@ -11,6 +11,6 @@ export class ReorderTaskDto {
   status: string;
 
   @ApiProperty({ description: '目标位置', example: 0 })
-  @IsNumber()
-  position: number;
+  @IsString()
+  position: string;
 }

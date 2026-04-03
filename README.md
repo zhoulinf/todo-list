@@ -35,7 +35,7 @@ Swagger 文档地址: http://localhost:3000/api-docs
 #### Docker 一键启动（推荐）
 
 ```bash
-docker-compose up --build && docker-compose start
+pnpm docker:up
 ```
 
 访问 http://localhost 即可使用。

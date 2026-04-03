@@ -14,16 +14,12 @@ export class TasksService {
   ) {}
 
   async findAll(): Promise<Task[]> {
-    return this.taskRepo.find({ order: { position: 'ASC', createdAt: 'ASC' } });
+    return this.taskRepo.find({ order: { position: 'ASC' } });
   }
 
   async create(dto: CreateTaskDto): Promise<Task> {
-    const count = await this.taskRepo.count({
-      where: { status: dto.status || 'todo' },
-    });
     const task = this.taskRepo.create({
       ...dto,
-      position: count,
     });
     return this.taskRepo.save(task);
   }

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsIn, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsIn } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateTaskDto {
@@ -25,7 +25,7 @@ export class UpdateTaskDto {
   status?: string;
 
   @ApiPropertyOptional({ description: '排序位置', example: 0 })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  position?: number;
+  position?: string;
 }

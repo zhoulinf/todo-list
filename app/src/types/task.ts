@@ -5,7 +5,7 @@ export interface Task {
   title: string;
   description: string;
   status: TaskStatus;
-  position: number;
+  position: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -14,11 +14,12 @@ export interface CreateTaskDto {
   title: string;
   description: string;
   status: TaskStatus;
+  position: string;
 }
 
 export interface UpdateTaskDto {
   title?: string;
   description?: string;
   status?: TaskStatus;
-  position?: number;
+  position?: string;
 }

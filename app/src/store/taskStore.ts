@@ -1,72 +1,72 @@
 import { create } from "zustand";
-import type { Task, TaskStatus, CreateTaskDto } from "../types/task";
-import * as api from "../api/task";
+import type { Task, TaskStatus } from "../types/task";
 
 interface TaskState {
   tasks: Task[];
   loading: boolean;
-  error: string | null;
-  fetchTasks: () => Promise<void>;
-  addTask: (dto: CreateTaskDto) => Promise<void>;
-  editTask: (id: number, dto: Partial<Task>) => Promise<void>;
-  removeTask: (id: number) => Promise<void>;
-  moveTask: (id: number, status: TaskStatus, position: number) => Promise<void>;
+  currentTask: Task | null;
+
+  setTasks: (tasks: Task[]) => void;
+  setLoading: (loading: boolean) => void;
+  setCurrentTask: (task: Task | null) => void;
+  edit: (id: number, dto: Partial<Task>) => void;
+  remove: (id: number) => Task | undefined;
+  move: (id: number, position: string, status?: TaskStatus,) => void;
+
+  syncIfChanged: (remoteTasks: Task[]) => void;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   loading: false,
-  error: null,
+  currentTask: null,
 
-  fetchTasks: async () => {
-    set({ loading: true, error: null });
-    try {
-      const tasks = await api.fetchTasks();
-      set({ tasks, loading: false });
-    } catch {
-      set({ error: "Failed to fetch tasks", loading: false });
-    }
+  setTasks: (tasks) => {
+    tasks.sort((a, b) => a.position.localeCompare(b.position));
+    set({ tasks })
+  },
+  setLoading: (loading) => set({ loading }),
+  setCurrentTask: (task) => set({ currentTask: task }),
+
+  edit: (id: number, dto: Partial<Task>) => {
+    set((s) => {
+      const tasks = s.tasks.map((t) =>
+        t.id === id ? { ...t, ...dto, updatedAt: new Date().toISOString() } : t,
+      );
+      if (dto.position !== undefined) {
+        tasks.sort((a, b) => a.position.localeCompare(b.position));
+      }
+      return { tasks };
+    });
   },
 
-  addTask: async (dto) => {
-    try {
-      const task = await api.createTask(dto);
-      set((s) => ({ tasks: [...s.tasks, task] }));
-    } catch {
-      set({ error: "Failed to create task" });
-    }
+  remove: (id: number) => {
+    const removed = get().tasks.find((t) => t.id === id);
+    set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) }));
+    return removed;
   },
 
-  editTask: async (id, dto) => {
-    try {
-      const updated = await api.updateTask(id, dto);
-      set((s) => ({
-        tasks: s.tasks.map((t) => (t.id === id ? updated : t)),
-      }));
-    } catch {
-      set({ error: "Failed to update task" });
-    }
+  move: (id: number,  position: string ,status?: TaskStatus,) => {
+    get().edit(id, { status, position })
   },
 
-  removeTask: async (id) => {
-    try {
-      await api.deleteTask(id);
-      set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) }));
-    } catch {
-      set({ error: "Failed to delete task" });
-    }
-  },
-
-  moveTask: async (id, status, position) => {
-    const prev = get().tasks;
-    // Optimistic update
-    set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === id ? { ...t, status, position } : t)),
-    }));
-    try {
-      await api.reorderTask(id, status, position);
-    } catch {
-      set({ tasks: prev, error: "Failed to move task" });
+  syncIfChanged: (remoteTasks) => {
+    const current = get().tasks;
+    const isSame =
+      current.length === remoteTasks.length &&
+      remoteTasks.every((rt) => {
+        const ct = current.find((t) => t.id === rt.id);
+        return (
+          ct &&
+          ct.status === rt.status &&
+          ct.position === rt.position &&
+          ct.title === rt.title &&
+          ct.description === rt.description
+        );
+      });
+    if (!isSame) {
+      remoteTasks.sort((a, b) => a.position.localeCompare(b.position));
+      set({ tasks: remoteTasks });
     }
   },
 }));

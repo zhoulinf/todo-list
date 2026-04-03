@@ -15,7 +15,7 @@ interface TaskDialogProps {
   onOpenChange: (open: boolean) => void;
   task?: Task | null;
   defaultStatus?: TaskStatus;
-  onSubmit: (data: CreateTaskDto) => void;
+  onSubmit: (data: Omit<CreateTaskDto, 'position'>) => void;
 }
 
 export function TaskDialog({
@@ -30,6 +30,7 @@ export function TaskDialog({
 
   useEffect(() => {
     if (task) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(task.title);
       setDescription(task.description);
     } else {

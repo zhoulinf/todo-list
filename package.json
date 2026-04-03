@@ -5,7 +5,8 @@
     "dev:frontend": "pnpm --filter app dev",
     "dev:backend": "pnpm --filter server start:dev",
     "dev": "pnpm run dev:frontend & pnpm run dev:backend",
-    "build:frontend": "pnpm --filter frontend build",
-    "build:backend": "pnpm --filter backend build"
+    "build:frontend": "pnpm --filter app build",
+    "build:backend": "pnpm --filter server build",
+    "docker:up": "bash start.sh"
   }
 }

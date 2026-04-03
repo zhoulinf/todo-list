@@ -23,8 +23,8 @@ export async function deleteTask(id: number): Promise<void> {
 
 export async function reorderTask(
   id: number,
-  status: string,
-  position: number
+  position: string,
+  status?: string,
 ): Promise<Task> {
   const { data } = await http.patch<Task>(`/tasks/${id}/reorder`, {
     status,
