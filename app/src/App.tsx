@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Column } from "./components/Column";
 import { useTaskStore } from "./store/taskStore";
 import { useTaskActions } from "./hooks/useTaskActions";
@@ -20,19 +20,17 @@ function App() {
   const taskList = useTaskStore((state) => state.tasks);
   const { fetchTasks, addTask, editTask, removeTask } = useTaskActions();
   const { activeTask, handleDragEnd, handleDragOver, handleDragStart, handleDragCancel } = useTaskDrag();
-  const taskListInTodo = taskList.filter((task) => task.status === "todo");
-  const taskListInProgress = taskList.filter(
-    (task) => task.status === "in_progress",
-  );
-  const taskListInDone = taskList.filter((task) => task.status === "done");
-  const columns: Array<{
-    status: TaskStatus;
-    tasks: typeof taskList;
-  }> = [
-    { status: "todo", tasks: taskListInTodo },
-    { status: "in_progress", tasks: taskListInProgress },
-    { status: "done", tasks: taskListInDone },
-  ];
+  const columns = useMemo(() => {
+    const grouped: Record<TaskStatus, Task[]> = { todo: [], in_progress: [], done: [] };
+    for (const task of taskList) {
+      grouped[task.status].push(task);
+    }
+    return [
+      { status: "todo" as const, tasks: grouped.todo },
+      { status: "in_progress" as const, tasks: grouped.in_progress },
+      { status: "done" as const, tasks: grouped.done },
+    ];
+  }, [taskList]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

@@ -35,8 +35,11 @@ export function useTaskActions() {
   const editTask = useCallback(
     async (id: number, dto: Partial<Task>) => {
       state().edit(id, dto);
-      await api.updateTask(id, dto);
-      await syncFromRemote();
+      try {
+        await api.updateTask(id, dto);
+      } catch {
+        await syncFromRemote();
+      }
     },
     [syncFromRemote],
   );
@@ -44,8 +47,11 @@ export function useTaskActions() {
   const removeTask = useCallback(
     async (id: number) => {
       state().remove(id);
-      await api.deleteTask(id);
-      await syncFromRemote();
+      try {
+        await api.deleteTask(id);
+      } catch {
+        await syncFromRemote();
+      }
     },
     [syncFromRemote],
   );
@@ -53,8 +59,11 @@ export function useTaskActions() {
   const moveTask = useCallback(
     async (id: number, position: string, status: TaskStatus) => {
       state().move(id, position, status);
-      await api.reorderTask(id, position, status);
-      await syncFromRemote();
+      try {
+        await api.reorderTask(id, position, status);
+      } catch {
+        await syncFromRemote();
+      }
     },
     [syncFromRemote],
   );

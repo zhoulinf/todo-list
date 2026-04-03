@@ -21,7 +21,7 @@ export const TaskCard = forwardRef<HTMLDivElement, TaskCardProps>(
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium text-gray-900 truncate">
-              {task.title}id: {task.id}
+              {task.title}
             </h3>
             {task.description && (
               <p className="mt-1 text-xs text-gray-500 line-clamp-2">
